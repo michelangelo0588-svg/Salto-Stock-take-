@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Salto — Stock Take</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  * { margin:0; padding:0; box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  body {
+    font-family:'DM Sans',sans-serif;
+    background:#F7F4EF;
+    color:#1A0F0A;
+    min-height:100vh;
+    padding-bottom:100px;
+  }
+
+  header {
+    background:#fff;
+    border-bottom:1px solid #E8E0D6;
+    padding:.9rem 1.2rem;
+    display:flex; align-items:center; gap:.8rem;
+    position:sticky; top:0; z-index:100;
+    box-shadow: 0 1px 8px rgba(0,0,0,.06);
+  }
+  .hdr-logo { width:36px; height:36px; border-radius:50%; object-fit:cover; }
+  .hdr-text h1 { font-size:1rem; font-weight:600; color:#1A0F0A; }
+  .hdr-text p { font-size:.72rem; color:#9A7A60; }
+
+  main { max-width:520px; margin:0 auto; padding:1.2rem 1rem; }
+
+  /* CONFIG NOTICE */
+  .notice {
+    background:#FFF8F0; border:1px solid #F0D9B5; border-radius:10px;
+    padding:.8rem 1rem; margin-bottom:1.2rem;
+    font-size:.8rem; color:#8B5E3C; line-height:1.5;
+  }
+
+  /* FORM META */
+  .meta-row {
+    display:grid; grid-template-columns:1fr 1fr; gap:.7rem; margin-bottom:1.2rem;
+  }
+  .field label {
+    display:block; font-size:.72rem; font-weight:600; color:#9A7A60;
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:.35rem;
+  }
+  .field input, .field select {
+    width:100%; padding:.6rem .85rem;
+    background:#fff; border:1.5px solid #E8E0D6; border-radius:10px;
+    color:#1A0F0A; font-family:inherit; font-size:.9rem;
+    transition:border-color .2s;
+  }
+  .field input:focus, .field select:focus {
+    outline:none; border-color:#C1692A;
+  }
+
+  /* SECTION TABS */
+  .tabs {
+    display:flex; gap:.5rem; margin-bottom:1rem;
+  }
+  .tab-btn {
+    flex:1; padding:.6rem; border-radius:10px;
+    border:1.5px solid #E8E0D6; background:#fff;
+    font-family:inherit; font-size:.85rem; font-weight:500;
+    color:#9A7A60; cursor:pointer; transition:all .15s; text-align:center;
+  }
+  .tab-btn.active {
+    background:#C1692A; border-color:#C1692A; color:#fff;
+  }
+
+  /* PROGRESS */
+  .progress-wrap { height:3px; background:#E8E0D6; border-radius:3px; margin-bottom:1.2rem; }
+  .progress-bar { height:100%; border-radius:3px; background:#C1692A; transition:width .3s; }
+
+  /* SECTION HEADER */
+  .section-label {
+    font-size:.75rem; font-weight:600; color:#9A7A60;
+    text-transform:uppercase; letter-spacing:.06em; margin-bottom:.6rem;
+  }
+
+  /* ITEM ROWS */
+  .items-list {
+    background:#fff; border-radius:14px; border:1.5px solid #E8E0D6;
+    overflow:hidden; margin-bottom:1.2rem;
+  }
+  .item-row {
+    display:flex; align-items:center;
+    padding:.75rem 1rem; border-bottom:1px solid #F0EAE0;
+    gap:.8rem;
+  }
+  .item-row:last-child { border-bottom:none; }
+  .item-info { flex:1; }
+  .item-name { font-size:.9rem; font-weight:500; color:#1A0F0A; }
+  .item-unit { font-size:.72rem; color:#9A7A60; margin-top:.1rem; }
+
+  .qty-wrap { display:flex; align-items:center; gap:.4rem; }
+  .qty-btn {
+    width:30px; height:30px; border-radius:50%;
+    border:1.5px solid #E8E0D6; background:#F7F4EF;
+    font-size:1rem; line-height:1; color:#1A0F0A;
+    cursor:pointer; display:flex; align-items:center; justify-content:center;
+    transition:all .15s; flex-shrink:0;
+  }
+  .qty-btn:active { background:#C1692A; border-color:#C1692A; color:#fff; }
+  .qty-input {
+    width:52px; text-align:center;
+    border:1.5px solid #E8E0D6; border-radius:8px;
+    padding:.3rem .2rem; font-family:inherit; font-size:.92rem;
+    color:#1A0F0A; background:#fff;
+    -moz-appearance:textfield;
+  }
+  .qty-input::-webkit-outer-spin-button,
+  .qty-input::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .qty-input:focus { outline:none; border-color:#C1692A; }
+  .qty-input.filled { border-color:#C1692A; color:#C1692A; font-weight:600; }
+
+  /* NOTES */
+  .notes-field {
+    width:100%; padding:.7rem .9rem;
+    background:#fff; border:1.5px solid #E8E0D6; border-radius:10px;
+    font-family:inherit; font-size:.88rem; color:#1A0F0A;
+    resize:vertical; min-height:75px; margin-bottom:1.2rem;
+  }
+  .notes-field:focus { outline:none; border-color:#C1692A; }
+
+  /* SUBMIT */
+  .submit-btn {
+    position:fixed; bottom:0; left:0; right:0;
+    margin:0; padding:1.1rem;
+    background:#C1692A; color:#fff;
+    font-family:inherit; font-size:1rem; font-weight:600;
+    border:none; cursor:pointer; transition:background .2s;
+    display:flex; align-items:center; justify-content:center; gap:.5rem;
+  }
+  .submit-btn:active { background:#a8571f; }
+  .submit-btn:disabled { background:#D4C4B5; cursor:not-allowed; }
+
+  /* SUCCESS */
+  #success-screen {
+    display:none; min-height:100vh;
+    flex-direction:column; align-items:center; justify-content:center;
+    padding:2rem; text-align:center; background:#F7F4EF;
+  }
+  .success-icon { font-size:3.5rem; margin-bottom:1rem; }
+  .success-title { font-size:1.5rem; font-weight:600; margin-bottom:.4rem; }
+  .success-sub { color:#9A7A60; font-size:.88rem; margin-bottom:2rem; line-height:1.6; }
+  .again-btn {
+    padding:.75rem 2rem; border-radius:10px;
+    border:1.5px solid #E8E0D6; background:#fff;
+    font-family:inherit; font-size:.9rem; font-weight:500;
+    color:#1A0F0A; cursor:pointer;
+  }
+
+  .status-msg { text-align:center; font-size:.78rem; padding:.4rem 1rem 0; color:#9A7A60; }
+  .status-msg.err { color:#EF476F; }
+</style>
+</head>
+<body>
+
+<div id="app-screen">
+  <header>
+    <img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCACgAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6vNFBpK846BaKSikAtFJXO+HNfubzxHrOhanDDBd2UgkgEecS27D5W56n1+vtSckmkXGDkm10OjopKWmQc/r+meJL2/8AM0zxQNMtNgHlLZLI27nJ3H144rlPDVl4k1rVNcsrzxvrER0u8+zjyEjXzBjIY8cfSvSj0rkvCNrc23jrxe0lvMkFxPBLFIyEK/yHO09DisZw95f5s7KNZqnJaaLTRd15HR6TaPYadDaSXtzetEuDPcMDI/JOWI+tW6Sitlocjd3dlDXNa0vRLQXWrX8NpEThTIeWPoAOT+FZukeN/C2q3S2tnrEPntwkcqtEzfTcBmsVLaDUPjLeLqqJL9i06J9OikGV5PzuAeCQc/5FdVrug6Vrtk1lqVnFMjjCttAeM9irdQRWSlOV2jpcKUElO92r39fLr96NLmiuR+FWoXd74dntr2c3MmnXktmtwTkyomNpJ7nBx+Arra0hLmSZjVpunNxfQWikopmYtFJRQAppKU0lABRWNf8Airw5Yam2mX2tWdtdqAWjkfbjPTnpn2zWnZ3lpeIHs7u3uVPeKVX/AJGkpJ6JlunKKu0TVxfxEtrnTdS0vxjp1vJPPYyCC7iiGWmt3OCMDqQT+vtXakEdRijp0pTjzKw6VT2cubc4rHjXxIeSPCumt9JL2Rf5R/zrq9Ks10/TrexSaedYECCSd98jAd2Pc1ZoojC2vUdSq5qySS8v6uFLSUVRkFFFFAGJ4p8N2uu/Z7j7RPY6hakm1vbc4kiJ6j3U+hrHm0f4gzwtZSeK9MSBhta5jsStxt9uwPuK7OiodNN3NoV5xVtHbukzN8M6LZ+H9Gh0uxDGKLJLv96RjyWPua0qKKtJJWRlKTk23uFFFFAgooooAU0lKaSgDzrxHDpPh/x899rNtayaNrduxmaeEOsVxGM55H8S/mTVPwp4G0vX3ufEF3pr6TaXWP7PtLVzC0cY6SsR/E3XHT9K7D4iaC3iHwtcWUCobyMie13Yx5i9Ac9iMj8a3bXzhaxC4EYm8tfMEf3d2BnHtnpXP7JObutDv+tONJOL97Z+i2/y+RHptnFp9hBZQNK0cKBFaWQu59yx5JqxRRXRscLbbuwooooEFFFFABRS9TgcmsC78QmbzE0aFLkR7g93KStshHHBHMhz2Xjg8jFJyS3KjBy2N12VEZ3YKijLMTgAe57ViXXiewWSSGxgvdUlQZYWkBZB9ZDhB+ZrIvNNg1SOSLWJ5NV2SYZpHaKEHqBHGMKPxLZ9+RV1kjMkdtJcMkSALGPKiJhwoyNoHGR3I+g6Coc29jeNKC31/r7/AMidtW1qVgINIgiB6eZM0jk45+VF4x9fpmq4u/E2zIutNZ2+6v2GUKPf7244Pt61DDEba0luRFYxW5G2by7TBCYHU5HGO/qelOWKS5trhSkUieYGjIQBY8D5cFCSMg9QOPfmpu2acsVsl/XqSx+ItQtIxLq2nQSQ8bpdNlaZkz/E0RG7GT1UtjuK3tOvrPUrRbuwuYrmBiQHjORkdQfQj0PNc45USpK0ag7xFG0cjFh7+p5GDnnPqOKqwrNY3T6lp8EouI03XlvEhCXKYyFx/wA9MElWHXGOQcAU2txSpRktNH+B2tFR208NzbR3NvIJIZUDxuOjKRkGpK2OPYU0lcxqupajdePNP0DS5hBDbR/bdRk2g7kJ2pFz03Hn8vSub1LxL4tubfVvE+iz2KaHpczRrbSxZa6WMgO+7t7cis5VUjphhZTtqlf9dvvPS6Kisp1urOC6QELNEsig9QGAP9alrQ5mrBRRRQAUUUUAFQ393bWFnLeXk6QW8Kl5JHPCj1NSsyqpZmCqoJJJwAB1JrhtQZ/F97DKtwi6BA7NCg63Uy/dd/RB1UHrjJ7VM5cu25rSp87u9kS3c954hkkGoCWw0WPDLBDOVmulPTzGU/KD12Dn1Par9vvjsYoMRW0ELKjKoCKpGMAL1Jx2AH1FLb3FnKkccE7i3VGXKx4y3CgbR1OWU4GOSOvQQSXFpZWE9zDJPcLCSxaNsnceCWbGQT02rz79MZbanS7v3Uv6/wAxZ5ZoH3wTWtosbmTzbwqAAR97b13HsODjk8mqkN3LFCbaHVLtJjhh9j04ARhudzZ4Utg8tz7euVd6mrC7n0uxM8kCqpuZXV33HJZUBJAK8ZIDHJ5IPTJvvFOhpe3N02rX5uwp2B4vNWNtoGACcMQRjJ44+uc5VEjohQlLp/X4mjd6xDJOtn5l7PGWwLWQxebcuG4O0nJHfPA4JJwMV0unMIoLaW4niV/NM+Gl2gZyFCnBAAwe/bqa4n4a2EurW0ur6sZ7lpmeGOV2x5US8uFOeNxIB4wBkDqRXQeJddg0e0klkY3DxrgxMQEXqoz2DHnCjoOeaUJac7HWp+/7KO5V1m4gvdTk0+FZbmMErOuSwdNo4XsV3Z+6dwyTW54ehltYIdPuLt40gCmEyyZcAHdszxnAJHuM9xXDeA9Yd2lvtX1NRbvIi/M7BrbaxMewnjqTwPU9a6O+1JzqcUlrfLMlm25sHPyABnUgcMMcjn5fpRCafvDq0pJ+z7HQ+Gp0sdUm0j5kt7lDfWKsCCisf3keDyMNlgPRj6V0lcBqtzb3tpa6voL/AOk2UwnCybxIUOX2Mrc4ZS3tzxXeQSxzwRzwsGjkUOhBzlSMiuim+h5+Iha0u5514l1HUPDfi3xBPFpN7eTaxawx6dLBGWUOqlSrHtgnNGv2h0b4eaX4Gt2D6rqgS2KKcn5m3TSH2HIz/hXpOSM4JH41XeztHvo757aJrqKMxpMUG9VPUA+hqXS313/Xc0jil7t1tb5tKyJLeJIII4I/uRoqL9AMD+VPoorY4woopQCegJ+lACU2WRIomlldY40UszMcBQOpJ7CqF/rmm2b+SbgXF0Thba3xJKx7AKOn44Fcx4ie61IfatUuUsdJtczPaJ+8Mm0jBkbgOckARrkZ6k1EppbG1Oi5PXRFHxTri61PFExuIND8xVQAFX1CRuhC8HyVGWPTcBzgYrYkjmR4sokjJgtFglC+NrbfxUDHdVb1rzDxLJf+IdatbpkS3tvNnjtP4i3lqGY+h/hBPrnHQV3eh339oabaWscrNctaHDN/DIWVHJI/uj19a5YT5pO56VWj7OEbf1/XU1BK6yqqvsiDbInwMEsNzSH325P1euC1SbV49VHhjRElma7f5I3OcJnPzOcc4BJb0OBXba5cR2ukC72NHA7tGgVc/u87Sw9sbTWD4S0t/EuuTXk8k0FpFbwh2gk8tnJQFoww5A35JIxwMDqadROTUUKg1CLnLZfmZ7eD44ZWXVvHEFrcZ2i0sh5jRgE4QKOeM9AvrRN8PoRpV2NK0vU5JlgLC71FxCpIGcJEvzE4Hfvj3r1bSNI0vSIvK0ywt7RT1MSAM31bqfxNXa0WGjbUxeY1E/df6fl/mzzS31ZtA0fRLCKwLRyKsDMnJjd1DKArEBi248n69KwPFOla/wCF7e01a/MFyDnahjEsNvO2c+ZuB3MRwGA65HA69d8SvAra5p6y6VO8dxb7mS0d/wBzJnqFB+4xxwenbisDwF4tS9hk8F+MY2cPm2R7jIbPTypM9G/ut9PY1jNWlyy07HVSmnD2tPX+Zdf6/ruZk3hi28RSW66RZWun3SQo949tKfJO5eVVTnLYxnBAySOetat5faj4eM9nZeGGkTZ5NrJkSQmTuzjC7cgsT68Z4FZHiO01HwJqsGnyXl5c6RK5ktTFIY5Yx0baw+7IuV4IKtnoK6u8u7241LTrm0vpTI97Hp99BICYp42j3RybCSF3ISfc5B6VMVa/Rlzk2k/ii9t/6/y2MfwVqWtpceILjxJKiR+UXuRKoV4SoCYUY+UbSNuMg4ra+H3iazi8RyeDrdt9pDAv2Offu8x1UGTH+yeWAHQg+uBvWdrc6g0FndWdolpblWuhEd0bSpgrGmQCR91iT0GF5PNdBJbW8k0U0kETywsWjcoNyEggkHtwTXRCnJWs9jhrYiErpx37dO39diY0lKarahdpZ25ldWkYnakakbpG7KM4HbqeB1NdBwJXdkSXVxBawNPczRwxIMs7tgD8a5W78dWhuWtdM029vZNuY3MZSOT3XgsR74A964b4gQ+LZbyHU/EEMcdjI3l29pBP5iREngNjG5j6/wBOK2vC2o2sGltJb2zy3Us21xEQiFEGQuWY8ew5PYAZxzOs3LlWh6UcJCMFN+96bfeatvrXivVQgtxp9grgksBvKgdTliRwPb8qddWn2uAw6nrlzI8w2pGzkMQpGTtTAAOeT07VzWteLb9pE8q0W2guhte5mUHyQOqgL6ZwBnknP1zNd1+0aO3lk1C9kWVBHNBbBUUhSepBLNk54JHUk46Vm6q6u5tHDTbVlb0/zOjOr2i3M1h4ehRWxtkEeSARjgc4xx06deDWd4hh1DV72z0fTpJftVyQHZ/mHljAdycnCrwP9ph9Kx/Cfh/XtYkjGlWLadYq+XupySmMYwBwZGyTz7DkCvVLTT7DwppbSW8Mt5eTskW9iPNuZDwq56KvsOAATzRBOotdEFWUKEko6y/rc8/+JtkLGC1h0oW6WvhuGJDuPzs8xJxt/wB1dxz61Y0u68q5f7Pcs0FzILpVRMBIWX5gM9T2I7lfpWt4yjg03wRqlvqV1bvq+pB55FQEiSRiqhU77V+VQT6c9awdN0f7DY6dNqZVJrW12shkwkeGLYf+8fmHA9l6kmlJNT0/r+kXTmpUbPvb16/n+Zr+KdRP9lXLcpHDbNKpA+QR8cc/xF9i4Gc/N6V0Xw0019P8NLLMmyW8kM5T+4pACr+Qz9Sa4zT9Kn8ea0k3lS2vh62b94+SDcsMAIvqoAxnoOT1NesoqogRFCqowAOgHpW1JOUuc48VJQgqS36i0UUV0HnhXl3x30myNtYarFCF1Cac27Mo5lTYSMjuQQMHrzXqNcl8R/Ct54mTTTZXqW0lnMz/AD5xyB8wx3BA/wDrVlXjzQaSOrBVFTrKTdkcL8Q7qbVfhr4TvroFpnkMU0jHBDbSpz9SuT9K6TwhLb2EUV7rtutta3drbX0V24PlRyxoysGbsedwz13cV1Ol+GtOtvDNpoV7FHqMFvhiZ4wd77i2/HY5JrawNu3A24xjHGPTFRGi+bmb7G1TFxcPZxWl3917lHQATpEEpzmbdOcjB+diw/Qir1FFdCVkcEnd3FNYDxHVvFBcuTaaYrQ7AOHmcKWJ/wB1SoHuTW+PvAH1rjLDUDpWjzyuwku7/Ubjy4kQmRj5jgj5eTjHb6e9RN7XNqMW7tb7ff8A8A1/FFrZ6vaNo926JHKAA+AzhicDaDxn/wCv714BPfXtrq8qWE80jxO8ULKAzISxUkbR94+w717hoVj4guLVmuimkq+QoRFM6KfblQ3uScenetHw74W0LQATplgkcrfemcl5G/4Een4YrCpSdVprQ7cPioYVSi/e/I860PwT4p1mwtBqksWnW8YLKJkLy5IxkJng98sevbgV2vh/wHoGk7HMDXsy9HuMEA8chBxngdc11NFawoQj5nNVxtWppey8gAAAAGABgD0rhfGPiO4g8e6Noem2qXlyI3cqTxHI64Rj6AKGJPZWOOcVueNvFFh4W0o3VziW4kyLa3B+aVv6KO5/rXK/BrTrm/l1DxnqreZeX8jRwuRgBAfnI9BkBR7LSqSvJQjuVh6XJCVaa02Xm2Wr9LbRJ7+6vUF6LRInM0p5luiC2cHPyqpQKP4c56kmo9G8MP4muoNb1tv+Jb/rbayGR52eQ8n+z6L6ck884ejSy+PPGd9aNGo0a3vHu5nBO6VcCNEPbBCD8M168AAAAAAOAAMAVFOKqa9DWvUlQSj9prXyERFjRURVRFGFVRgAegHYUtFFdJ5oUUUUAFFFFABRRXK6v40ih1ObS9F0e/168tzi4FoAI4T6M54z7UpSUdy6dOVR2ijqqK5/wp4qs9emuLM21zp+o2vM9ndLiRR6j1FdBRGSkroJwlB8slqL3qhYaTY2V1Ndww5uZid8rnc2CSdoPZck8D9avmkp2JUmlZBRRQxCgsxAAGSScAUCCimxSRyoJIpEkQ9GRgwP4inUAcD4t+Hs3ibxSdT1DWtlkFVEt4ofnRB1UMTjk5Ocd6v+P9Ts/CfgSS1sdlvI0P2SyiU8jIwSP90ZJPrj1rsK8rv/AAL4g8TeN59Q8RvFBpqyERrFPvYxA/LGg/hyOST6msKkeRPkWrO+hU9q17aXux6Gj8B9Key8KTX8qFWv5t0eepjQbVP0J3V6FTIIooIUghjWOKNQiIowFUDAA9qfWtOHJFROavVdao5vqFFFFUYhRRRQAUUUUAZPjO/m0vwnquo23+ut7R3jPo2MA/hnP4VB4B0220vwhp0FthvMgSeWTvLI4DMxPc8/pWxeW8N3aTWtxGJIZkaORD/EpGCK4my8OeN9Eh/szQvEWnvpi5EBvbctLAvoMDBx/kCs5XUua1zpp8sqThzWd769f+GLF8I7j4xab9kA8210uU3rL2VjiNW/PIrs6xPCfh6HQYJ3a5lvtQu38y8vJvvzN/RR2FbdOCaTb6kVpqTSjslYU0lKaSrMQrjvHSnxZ4P1Ox8P3QnuLW5CTwqSpkZDlojnHX8iRXY1x+uaXqmia/N4n8O2/wBsS5AGp6cDgzY6SR/7Y9O/41nV+G3Q6MNZTvfVbdr+ZgaXb2sekt4m+H4ks7i1GNQ0Z3YpJt+8hU8q4wcMOuPWvQdA1S11rRrXVbJiYLmMOoPVfVT7g5H4V59bavaar8SdKvvDNlqENzKGTWlltzEvlY6vnjeD3+lenRoiIERFRR0CgAD8BUUettjbGaW5lr57+j7+T7C0UUMyqpZiFUDJJOABW5whRQCCAQQQehFFABRRRQAUUVV1eG8uNMuINPvBZXTpiKcxh/LPrg9aGNK7sZvijxRpugCOGXzLq/m4t7G3G6aUnpx2Huf1qbwvLr09jJPr9taWs0km6K3gYsYo8cK56FvpXN6l8PLRdDkbTbid/ECSC5i1KeQmaSZeQCeynpjtxW74H8QL4h0QXEkfkX0DGG9gIwYpR1GPQ9R+Xasoylz2lodU4U1SvT17v8reTN2iiitTkCiiigBTSUppKACiiigBcn1NJRRQAV59qt9/wnWvv4c0+7WPQrRwdRnSQBrog/6qPuV45PT9M9l4h059W0ifTkvrixE67WmgA37e4GfXpWLL8PfCElpDAdGiQwoEWaN2SXjuWB5PuayqKUtFsdWHnTp+9J69NNvPp8it8Ky1naav4dlJ36TqMkSA9fKf5k/rXZVw/hnw9ceGfHtwlot/c6VqFiC1xO/meXMjcKzdfu9M13FOldRs+gsVZ1OaLvfX/P8AEUHBBPauR+HV5eNdeItKv7qa5nsNTcK8rlm8txlRk9uK62uF1C08TaV4+1PU9B0WPULfUrWEO0twIo0kXjJPUnA6D1oqNppioJSjKD7aff8A5XO6orlLW18f3dzFLfaro2nQK6s8FrbtKzKDyu9umRxkV1h61cZX6GU4cnVP0EqjZ6Rp1pql5qdtbLHd3u37RICfn29OOn+NXqKdkyVJq9gooooEFFFFAH//2Q==" class="hdr-logo" alt="Salto">
+    <div class="hdr-text">
+      <h1>Stock Take</h1>
+      <p>Salto Pastawerk & Osteria</p>
+    </div>
+  </header>
+
+  <main>
+    <div class="notice" id="config-notice" style="display:none">
+      ⚙️ <strong>Setup needed:</strong> Add your Supabase URL and key in the script to enable sync with Ground Control.
+    </div>
+
+    <!-- Meta -->
+    <div class="meta-row">
+      <div class="field">
+        <label>Your Name</label>
+        <input type="text" id="staff-name" placeholder="e.g. Marco" autocomplete="given-name">
+      </div>
+      <div class="field">
+        <label>Period</label>
+        <select id="period-select">
+          <option>January</option><option>February</option><option>March</option>
+          <option>April</option><option>May</option><option>June</option>
+          <option>July</option><option>August</option><option>September</option>
+          <option>October</option><option>November</option><option>December</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="tabs">
+      <button class="tab-btn active" onclick="switchTab('kitchen', this)">🍳 Kitchen</button>
+      <button class="tab-btn" onclick="switchTab('bar', this)">🍷 Bar</button>
+    </div>
+    <div class="progress-wrap">
+      <div class="progress-bar" id="progress-bar" style="width:50%"></div>
+    </div>
+
+    <!-- Kitchen -->
+    <div id="tab-kitchen">
+      <div class="section-label">Kitchen — closing quantities</div>
+      <div class="items-list" id="kitchen-items"></div>
+    </div>
+
+    <!-- Bar -->
+    <div id="tab-bar" style="display:none">
+      <div class="section-label">Bar — closing quantities</div>
+      <div class="items-list" id="bar-items"></div>
+    </div>
+
+    <!-- Notes -->
+    <div class="field">
+      <label>Notes / Issues</label>
+      <textarea class="notes-field" id="notes" placeholder="Damaged items, low stock alerts, supplier issues..."></textarea>
+    </div>
+  </main>
+
+  <button class="submit-btn" id="submit-btn" onclick="submitStock()">
+    Submit Stock Take →
+  </button>
+  <div class="status-msg" id="status-msg"></div>
+</div>
+
+<!-- SUCCESS -->
+<div id="success-screen">
+  <div class="success-icon">✅</div>
+  <div class="success-title">Submitted!</div>
+  <div class="success-sub" id="success-detail">
+    Stock take sent to Ground Control.
+  </div>
+  <button class="again-btn" onclick="resetForm()">Do another period</button>
+</div>
+
+<script>
+// ════════════════════════════════════
+// ⚙️ CONFIG — fill in after Supabase setup
+// ════════════════════════════════════
+const SUPABASE_URL = 'https://phoocxomnrtnvuymekpa.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBob29jeG9tbnJ0bnZ1eW1la3BhIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzI3Mzk5MTIsImV4cCI6MjA4ODMxNTkxMn0.r8d2J3EFXAcKzipwBGJt26GiWKf99uFmMNrvCHYm5Ug';
+
+// ════════════════════════════════════
+// STOCK ITEMS
+// ════════════════════════════════════
+const kitchenItems = [
+  { name:'Beef Sirloin',     unit:'kg' },
+  { name:'Chicken Breast',   unit:'kg' },
+  { name:'Salmon Fillet',    unit:'kg' },
+  { name:'Pasta Dried',      unit:'kg' },
+  { name:'Cream',            unit:'L'  },
+  { name:'Butter',           unit:'kg' },
+  { name:'Eggs',             unit:'doz'},
+  { name:'Olive Oil',        unit:'L'  },
+  { name:'Mixed Salad',      unit:'kg' },
+  { name:'Coffee Beans',     unit:'kg' },
+  { name:'Flour',            unit:'kg' },
+  { name:'Tomatoes',         unit:'kg' },
+];
+
+const barItems = [
+  { name:'Red Wine',         unit:'bottles' },
+  { name:'White Wine',       unit:'bottles' },
+  { name:'Sparkling Wine',   unit:'bottles' },
+  { name:'Beer - Craft',     unit:'cases'   },
+  { name:'Beer - Lager',     unit:'cases'   },
+  { name:'Spirits - Gin',    unit:'bottles' },
+  { name:'Spirits - Vodka',  unit:'bottles' },
+  { name:'Spirits - Whiskey',unit:'bottles' },
+  { name:'Soft Drinks',      unit:'cases'   },
+  { name:'Juices',           unit:'L'       },
+  { name:'Syrups & Mixers',  unit:'bottles' },
+  { name:'Tonic Water',      unit:'cases'   },
+];
+
+function buildList(items, containerId) {
+  const container = document.getElementById(containerId);
+  items.forEach((item, i) => {
+    const id = `${containerId}-${i}`;
+    const div = document.createElement('div');
+    div.className = 'item-row';
+    div.innerHTML = `
+      <div class="item-info">
+        <div class="item-name">${item.name}</div>
+        <div class="item-unit">${item.unit}</div>
+      </div>
+      <div class="qty-wrap">
+        <button class="qty-btn" onclick="adj('${id}',-1)">−</button>
+        <input class="qty-input" id="${id}" type="number" min="0" step="0.5" placeholder="0"
+          oninput="this.classList.toggle('filled', this.value!=='' && parseFloat(this.value)>0)">
+        <button class="qty-btn" onclick="adj('${id}',1)">+</button>
+      </div>`;
+    container.appendChild(div);
+  });
+}
+
+function adj(id, d) {
+  const el = document.getElementById(id);
+  const v = Math.max(0, (parseFloat(el.value)||0) + d);
+  el.value = v % 1 === 0 ? v : v.toFixed(1);
+  el.classList.toggle('filled', v > 0);
+}
+
+// ════════════════════════════════════
+// TABS
+// ════════════════════════════════════
+function switchTab(tab, btn) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.getElementById('tab-kitchen').style.display = tab === 'kitchen' ? 'block' : 'none';
+  document.getElementById('tab-bar').style.display     = tab === 'bar'     ? 'block' : 'none';
+  document.getElementById('progress-bar').style.width  = tab === 'kitchen' ? '50%'   : '100%';
+}
+
+// ════════════════════════════════════
+// SUBMIT
+// ════════════════════════════════════
+async function submitStock() {
+  const name   = document.getElementById('staff-name').value.trim() || 'Staff';
+  const period = document.getElementById('period-select').value;
+  const notes  = document.getElementById('notes').value.trim();
+  const btn    = document.getElementById('submit-btn');
+  const msg    = document.getElementById('status-msg');
+
+  const kitchen = {};
+  kitchenItems.forEach((item, i) => {
+    kitchen[item.name] = parseFloat(document.getElementById(`kitchen-items-${i}`)?.value) || 0;
+  });
+  const bar = {};
+  barItems.forEach((item, i) => {
+    bar[item.name] = parseFloat(document.getElementById(`bar-items-${i}`)?.value) || 0;
+  });
+
+  const payload = {
+    period,
+    staff_name: name,
+    submitted_at: new Date().toISOString(),
+    kitchen,
+    bar,
+    notes
+  };
+
+  btn.disabled = true;
+  btn.textContent = 'Submitting…';
+  msg.textContent = '';
+  msg.className = 'status-msg';
+
+  if (SUPABASE_URL !== 'YOUR_SUPABASE_URL') {
+    try {
+      const res = await fetch(SUPABASE_URL + '/rest/v1/stock_takes', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'apikey': SUPABASE_ANON_KEY,
+          'Authorization': 'Bearer ' + SUPABASE_ANON_KEY,
+          'Prefer': 'return=minimal'
+        },
+        body: JSON.stringify(payload)
+      });
+      if (!res.ok) throw new Error('Error ' + res.status);
+      showSuccess(name, period);
+    } catch(e) {
+      btn.disabled = false;
+      btn.textContent = 'Submit Stock Take →';
+      msg.textContent = '⚠️ ' + e.message + '. Check your connection.';
+      msg.className = 'status-msg err';
+    }
+  } else {
+    // Demo mode
+    console.log('Payload:', payload);
+    setTimeout(() => showSuccess(name, period), 600);
+  }
+}
+
+function showSuccess(name, period) {
+  document.getElementById('app-screen').style.display = 'none';
+  document.getElementById('success-screen').style.display = 'flex';
+  document.getElementById('success-detail').innerHTML =
+    `<strong>${name}</strong>'s stock take for <strong>${period}</strong><br>has been sent to Ground Control.`;
+}
+
+function resetForm() {
+  document.getElementById('success-screen').style.display = 'none';
+  document.getElementById('app-screen').style.display = 'block';
+  document.getElementById('submit-btn').disabled = false;
+  document.getElementById('submit-btn').textContent = 'Submit Stock Take →';
+  document.getElementById('notes').value = '';
+  document.getElementById('staff-name').value = '';
+  document.querySelectorAll('.qty-input').forEach(el => { el.value=''; el.classList.remove('filled'); });
+  switchTab('kitchen', document.querySelector('.tab-btn'));
+}
+
+// ════════════════════════════════════
+// INIT
+// ════════════════════════════════════
+buildList(kitchenItems, 'kitchen-items');
+buildList(barItems, 'bar-items');
+
+// Set current month
+const months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+document.getElementById('period-select').value = months[new Date().getMonth()];
+
+if (false) {
+  document.getElementById('config-notice').style.display = 'block';
+}
+</script>
+</body>
+</html>
